@@ -227,9 +227,9 @@ function StockVehicleMenu()
 			if (valid) then
 				TriggerServerEvent('eden_garage:debug', "plaque vehicule rentree au garage: "  .. vehicleProps.plate)
 				TriggerServerEvent('eden_garage:logging',"santee vehicule rentree au garage: " .. engineHealth)
-				if engineHealth < 1000 then
-			        local fraisRep= math.floor((1000 - engineHealth)*100)			      
-			        reparation(fraisRep,vehicle,vehicleProps)
+				if engineHealth < 1000 and  then
+			        local fraisRep= math.floor((1000 - engineHealth)*100)
+				reparation(factorial(fraisRep),vehicle,vehicleProps)
 			    else
 			    	ranger(vehicle,vehicleProps)
 			    end	
@@ -243,6 +243,17 @@ function StockVehicleMenu()
 
 end
 -- Fin fonction qui permet de rentrer un vehicule 
+function factorial(num)
+num = math.abs(num)     --Factorial only works for positive numbers.
+num = math.floor(num + .5) --Factorial only works for integers.
+local result = num
+while num > 0 do
+num = num - 1
+result = result*num
+end	 
+return result
+end
+
 --Fin fonction Menu
 
 
