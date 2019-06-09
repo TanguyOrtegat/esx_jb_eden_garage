@@ -187,7 +187,7 @@ end)
 
 --debut de payement pour la santé vehicule
 AddEventHandler('eden_garage:payhealth', function(price)
-
+	local price = math.abs(price)
 	local xPlayer = ESX.GetPlayerFromId(source)
 
 	xPlayer.removeMoney(price)
