@@ -189,7 +189,7 @@ function reparation(prix,vehicle,vehicleProps)
 
 			menu.close()
 			if(data.current.value == 'yes') then
-				TriggerServerEvent('eden_garage:payhealth', prix)
+				TriggerServerEvent('eden_garage:payhealth', math.abs(prix))
 				ranger(vehicle,vehicleProps)
 			end
 			if(data.current.value == 'no') then
@@ -229,7 +229,7 @@ function StockVehicleMenu()
 				TriggerServerEvent('eden_garage:logging',"santee vehicule rentree au garage: " .. engineHealth)
 				if engineHealth < 1000 and  then
 			        local fraisRep= math.floor((1000 - engineHealth)*100)
-				reparation(math.abs(fraisRep),vehicle,vehicleProps)
+				reparation(fraisRep,vehicle,vehicleProps)
 			    else
 			    	ranger(vehicle,vehicleProps)
 			    end	
