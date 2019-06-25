@@ -227,7 +227,7 @@ function StockVehicleMenu()
 			if (valid) then
 				TriggerServerEvent('eden_garage:debug', "plaque vehicule rentree au garage: "  .. vehicleProps.plate)
 				TriggerServerEvent('eden_garage:logging',"santee vehicule rentree au garage: " .. engineHealth)
-				if engineHealth < 1000 and  then
+				if engineHealth < 1000 then
 			        local fraisRep= math.floor((1000 - engineHealth)*100)
 				reparation(fraisRep,vehicle,vehicleProps)
 			    else
