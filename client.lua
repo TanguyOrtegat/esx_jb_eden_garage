@@ -112,24 +112,28 @@ end
 
 -- Afficher les listes des vehicules
 function ListVehiclesMenu()
-	local elements = {}
+	local elements, vehiclePropsList = {}, {}
 
 	ESX.TriggerServerCallback('eden_garage:getVehicles', function(vehicles)
 
-		for _,v in pairs(vehicles) do
+		for k,v in ipairs(vehicles) do
+			local vehicleProps = json.decode(v.vehicle)
+			vehiclePropsList[vehicleProps.plate] = vehicleProps
+			local vehicleHash = vehicleProps.model
+			local vehicleName = GetDisplayNameFromVehicleModel(vehicleHash)
+			local vehicleLabel
 
-			local hashVehicule = v.vehicle.model
-			local vehicleName = GetDisplayNameFromVehicleModel(hashVehicule)
-			local labelvehicle
-
-			if(v.state)then
-			labelvehicle = vehicleName..': Garage'
-
+			if v.state then
+				vehicleLabel = vehicleName..': Garage'
 			else
-			labelvehicle = vehicleName..': Fourriere'
+				vehicleLabel = vehicleName..': Fourriere'
 			end
-			table.insert(elements, {label =labelvehicle , value = v})
 
+			table.insert(elements, {
+				label = vehicleLabel,
+				state = v.state,
+				plate = vehicleProps.plate
+			})
 		end
 
 		ESX.UI.Menu.Open(
@@ -140,9 +144,10 @@ function ListVehiclesMenu()
 			elements = elements,
 		},
 		function(data, menu)
-			if(data.current.value.state)then
+			if data.current.state then
 				menu.close()
-				SpawnVehicle(data.current.value.vehicle)
+				local vehicleProps = vehiclePropsList[data.current.plate]
+				SpawnVehicle(vehicleProps)
 			else
 				TriggerEvent('esx:showNotification', 'Votre véhicule est a la fourriere')
 			end
@@ -253,21 +258,21 @@ end
 --Fin fonction pour spawn vehicule
 
 --Fonction pour spawn vehicule fourriere
-function SpawnPoundedVehicle(vehicle)
+function SpawnPoundedVehicle(vehicleProps)
 
-	ESX.Game.SpawnVehicle(vehicle.model, {
+	ESX.Game.SpawnVehicle(vehicleProps.model, {
 		x = this_Garage.SpawnMunicipalPoundPoint.Pos.x ,
 		y = this_Garage.SpawnMunicipalPoundPoint.Pos.y,
 		z = this_Garage.SpawnMunicipalPoundPoint.Pos.z + 1
 		},180, function(callback_vehicle)
-		ESX.Game.SetVehicleProperties(callback_vehicle, vehicle)
+		ESX.Game.SetVehicleProperties(callback_vehicle, vehicleProps)
 		local plate = GetVehicleNumberPlateText(callback_vehicle)
 		TriggerServerEvent("ls:mainCheck", plate, callback_vehicle, true)
 		end)
-	TriggerServerEvent('eden_garage:modifystate', vehicle, true)
+	TriggerServerEvent('eden_garage:modifystate', vehicleProps, true)
 
 	ESX.SetTimeout(10000, function()
-		TriggerServerEvent('eden_garage:modifystate', vehicle, false)
+		TriggerServerEvent('eden_garage:modifystate', vehicleProps, false)
 	end)
 
 end
@@ -304,18 +309,19 @@ function ReturnVehicleMenu()
 
 	ESX.TriggerServerCallback('eden_garage:getOutVehicles', function(vehicles)
 
-		local elements = {}
+		local elements, vehiclePropsList = {}, {}
 
-		for _,v in pairs(vehicles) do
+		for k,v in ipairs(vehicles) do
+			local vehicleProps = json.decode(v.vehicle)
+			vehiclePropsList[vehicleProps.plate] = vehicleProps
+			local vehicleHash = vehicleProps.model
+			local vehicleName = GetDisplayNameFromVehicleModel(vehicleHash)
+			local vehicleLabel = vehicleName..': Sortie'
 
-			local hashVehicule = v.model
-			local vehicleName = GetDisplayNameFromVehicleModel(hashVehicule)
-			local labelvehicle
-
-			labelvehicle = vehicleName..': Sortie'
-
-			table.insert(elements, {label =labelvehicle , value = v})
-
+			table.insert(elements, {
+				label = vehicleLabel,
+				plate = vehicleProps.plate
+			})
 		end
 
 		ESX.UI.Menu.Open(
@@ -332,7 +338,8 @@ function ReturnVehicleMenu()
 
 					if times == 0 then
 						TriggerServerEvent('eden_garage:pay')
-						SpawnPoundedVehicle(data.current.value)
+						local vehicleProps = vehiclePropsList[data.current.plate]
+						SpawnPoundedVehicle(vehicleProps)
 						times=times+1
 					elseif times > 0 then
 						ESX.SetTimeout(60000, function()
